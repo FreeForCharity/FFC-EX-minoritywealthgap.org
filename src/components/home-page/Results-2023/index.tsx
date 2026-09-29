@@ -1,12 +1,13 @@
 import React from 'react'
 import ResultCard from '@/components/ui/ResultCard'
 import { results } from '@/data/results'
+import { resultsSectionVisible } from '@/lib/section-visibility'
 
 // The heading and stat cards are sourced from src/data/results.ts. To change
 // the impact numbers or labels, edit that file — no need to touch this
 // component.
 const index = () => {
-  if (results.stats.length === 0) return null
+  if (!resultsSectionVisible() || results.stats.length === 0) return null
 
   return (
     <div id="results">

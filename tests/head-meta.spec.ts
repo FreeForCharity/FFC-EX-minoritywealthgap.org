@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { siteConfig } from '../src/lib/site.config'
 
 /**
  * Pins the metadata contract that #257 / #259 promised: every page in the
@@ -22,7 +23,6 @@ test.describe('head metadata and security claims', () => {
     expect(csp).toContain('default-src')
     expect(csp).toContain('https://www.googletagmanager.com') // GTM
     expect(csp).toContain('https://www.clarity.ms') // Microsoft Clarity
-    expect(csp).toContain('https://widgets.sociablekit.com') // Facebook events widget
     expect(csp).toContain('https://forms.office.com') // Microsoft Forms iframe
     expect(csp).toContain('object-src')
     // frame-ancestors is intentionally omitted from the meta CSP (browsers
@@ -95,11 +95,19 @@ test.describe('static artifacts shipped to /out', () => {
     expect(body).toContain('<loc>')
   })
 
-  test('/.well-known/security.txt has Contact and a future Expires', async ({ request }) => {
+  test('/.well-known/security.txt has the right Contact and a future Expires', async ({
+    request,
+  }) => {
     const response = await request.get('/.well-known/security.txt')
     expect(response.status()).toBe(200)
     const body = await response.text()
-    expect(body).toMatch(/^Contact:/im)
+    // A Contact line only when the organization has published an email
+    // (never another organization's address).
+    if (siteConfig.contactEmail.trim()) {
+      expect(body).toMatch(new RegExp(`^Contact: mailto:${siteConfig.contactEmail.trim()}`, 'im'))
+    } else {
+      expect(body).not.toMatch(/^Contact:/im)
+    }
     const expiresMatch = body.match(/^Expires:\s*(.+)$/im)
     expect(expiresMatch).not.toBeNull()
     if (expiresMatch) {

@@ -29,6 +29,11 @@ async function activateMissionVideo(page: Page) {
 }
 
 test.describe('Mission Video', () => {
+  test.skip(
+    !testConfig.supporterSite,
+    "The mission video is FFC's own; it renders only on FFC's site."
+  )
+
   test('should show the click-to-play facade without loading the video', async ({ page }) => {
     await page.goto('/')
 

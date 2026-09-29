@@ -3,11 +3,31 @@ import { render, screen } from '@testing-library/react'
 import { axe, toHaveNoViolations } from 'jest-axe'
 import Footer from '../../src/components/footer'
 import { siteConfig } from '../../src/lib/site.config'
+import { asCharitySite, restoreSiteConfig } from '../helpers/site-identity'
+
+/**
+ * A charity with every footer field configured and nothing pending, so the
+ * tests below exercise the rendered values whatever this site ships (a
+ * provisioned site may still have most of them pending).
+ */
+function asConfiguredCharity(): void {
+  asCharitySite({
+    guidestar: {
+      profileUrl: 'https://www.guidestar.org/profile/12-3456789',
+      directProfileUrl: 'https://www.guidestar.org/profile/12-3456789',
+    },
+    pending: [],
+  })
+}
 
 // Extend Jest matchers
 expect.extend(toHaveNoViolations)
 
 describe('Footer component', () => {
+  afterEach(() => {
+    restoreSiteConfig()
+  })
+
   it('should render the footer', () => {
     render(<Footer />)
     const footer = screen.getByRole('contentinfo')
@@ -43,12 +63,14 @@ describe('Footer component', () => {
   })
 
   it('should have GuideStar profile link', () => {
+    asConfiguredCharity()
     render(<Footer />)
     const guidestarLink = screen.getByText(/GuideStar Profile/i)
     expect(guidestarLink).toBeInTheDocument()
   })
 
   it('should have email contact link', () => {
+    asConfiguredCharity()
     render(<Footer />)
     // Look for email link
     const links = screen.getAllByRole('link')
@@ -57,17 +79,36 @@ describe('Footer component', () => {
   })
 
   it('renders the EIN from siteConfig', () => {
+    asConfiguredCharity()
     render(<Footer />)
     expect(screen.getByText(`${siteConfig.name} EIN: ${siteConfig.ein}`)).toBeInTheDocument()
   })
 
   it('renders the phone number from siteConfig as a tel link', () => {
+    asConfiguredCharity()
     render(<Footer />)
     const telLink = screen
       .getAllByRole('link')
       .find((link) => link.getAttribute('href') === `tel:${siteConfig.phone.tel}`)
     expect(telLink).toBeDefined()
     expect(telLink).toHaveTextContent(siteConfig.phone.display)
+  })
+
+  it('omits the Call Us block when the charity publishes no phone number', () => {
+    const saved = { ...siteConfig.phone }
+    siteConfig.phone = { display: '', tel: '' }
+    // Not pending: an empty phone then means "the charity has none".
+    siteConfig.pending = []
+    try {
+      render(<Footer />)
+      expect(screen.queryByText('Call Us Today')).not.toBeInTheDocument()
+      const telLinks = screen
+        .getAllByRole('link')
+        .filter((link) => link.getAttribute('href')?.startsWith('tel:'))
+      expect(telLinks).toHaveLength(0)
+    } finally {
+      siteConfig.phone = saved
+    }
   })
 
   it('always renders the permanent "Supported by" attribution in the bottom bar', () => {

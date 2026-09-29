@@ -5,8 +5,20 @@ import { render, screen } from '@testing-library/react'
 // IntersectionObserver + matchMedia (stubbed in jest.setup.js to report
 // prefers-reduced-motion: reduce), so the static value path is taken here.
 import Results from '../../../src/components/home-page/Results-2023'
+import { asCharitySite, asSupporterSite, restoreSiteConfig } from '../../helpers/site-identity'
 
 describe('Results-2023', () => {
+  // The shipped numbers are the supporting organization's own results, so the
+  // section renders only on its own site (see resultsSectionVisible).
+  beforeEach(asSupporterSite)
+  afterEach(restoreSiteConfig)
+
+  it("renders nothing on a charity's site", () => {
+    asCharitySite()
+    const { container } = render(<Results />)
+    expect(container).toBeEmptyDOMElement()
+  })
+
   it('renders the section heading', () => {
     render(<Results />)
     expect(screen.getByRole('heading', { level: 2, name: /Results - 2023/i })).toBeInTheDocument()

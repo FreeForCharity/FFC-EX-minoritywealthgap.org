@@ -11,6 +11,11 @@ import { testConfig } from './test.config'
  */
 
 test.describe('Results 2023 Animated Numbers', () => {
+  test.skip(
+    !testConfig.supporterSite,
+    "The Results numbers are FFC's own; they render only on FFC's site."
+  )
+
   // Helper selector for ResultCard components - uses the distinctive border class
   // to identify the card containing a specific description
   const getResultCard = (page: import('@playwright/test').Page, description: string) =>

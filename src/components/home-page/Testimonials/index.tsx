@@ -11,6 +11,7 @@ import Image from 'next/image'
 import QuoteLeft from '../../../../public/Svgs/quote-left.svg'
 import QuoteRight from '../../../../public/Svgs/quote-right.svg'
 import { configuredTestimonials } from '@/data/testimonials'
+import { testimonialsSectionVisible } from '@/lib/section-visibility'
 
 // Testimonials are sourced from src/data/testimonials/*.json (aggregated in
 // src/data/testimonials.ts). To change them, edit those JSON files — no need to
@@ -43,7 +44,7 @@ const TestimonialSlider: React.FC = () => {
     swiperInstance?.slideTo(index)
   }
 
-  if (configuredTestimonials.length === 0) return null
+  if (!testimonialsSectionVisible() || configuredTestimonials.length === 0) return null
 
   return (
     <section id="testimonials" className="py-16 pb-25 bg-[#FCFCFC]">

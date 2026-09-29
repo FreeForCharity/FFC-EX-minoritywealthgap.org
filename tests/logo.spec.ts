@@ -12,7 +12,17 @@ import { testConfig } from './test.config'
  */
 
 test.describe('Logo and Image Visibility', () => {
+  test("a charity's header shows its name as text, not FFC's logo", async ({ page }) => {
+    test.skip(testConfig.supporterSite, "FFC's own site shows its logo (asserted below).")
+    await page.goto('/')
+    const home = page.locator('header a[href="/"]').first()
+    await expect(home).toContainText(testConfig.logo.headerAlt)
+    await expect(page.locator('header img[src*="logo.webp"]')).toHaveCount(0)
+    await expect(page.locator(`img[alt="${testConfig.logo.heroAlt}"]`)).toHaveCount(0)
+  })
+
   test('should display logo in header', async ({ page }) => {
+    test.skip(!testConfig.supporterSite, "The header logo and hero mark are FFC's own.")
     // Navigate to the homepage
     await page.goto('/')
 
@@ -28,6 +38,7 @@ test.describe('Logo and Image Visibility', () => {
   })
 
   test('should display hero section image', async ({ page }) => {
+    test.skip(!testConfig.supporterSite, "The header logo and hero mark are FFC's own.")
     // Navigate to the homepage
     await page.goto('/')
 
@@ -42,6 +53,7 @@ test.describe('Logo and Image Visibility', () => {
   })
 
   test('both header logo and hero image should be present on the same page', async ({ page }) => {
+    test.skip(!testConfig.supporterSite, "The header logo and hero mark are FFC's own.")
     // Navigate to the homepage
     await page.goto('/')
 

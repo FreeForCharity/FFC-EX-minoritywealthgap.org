@@ -12,9 +12,17 @@
  */
 
 import { analyticsConfig } from '../src/lib/analytics.config'
-import { siteConfig } from '../src/lib/site.config'
+import { isSupportingOrgSite, siteConfig } from '../src/lib/site.config'
 
 export const testConfig = {
+  /**
+   * True on the supporting organization's (FFC's) own site. Sections whose
+   * copy is FFC's own (mission video, programs and application form, results,
+   * testimonials, FAQ, hero logo mark) render only there, so their specs skip
+   * on a charity's site.
+   */
+  supporterSite: isSupportingOrgSite(),
+
   /**
    * Mission Video Configuration
    * Used in: tests/mission-video.spec.ts
@@ -44,44 +52,39 @@ export const testConfig = {
     sectionId: 'events',
     heading: 'Upcoming Events',
     footerLinkText: 'Events',
-    iframeTitle: 'Facebook Events',
     facebookLinkText: 'View all events on Facebook',
-    facebookUrl: 'https://www.facebook.com/freeforcharity',
-    descriptionText: 'volunteer opportunities',
-    // Sourced from siteConfig so the expected iframe src always matches what the
+    // Sourced from siteConfig so the expected link always matches what the
     // Events component renders (single source of truth).
-    widgetUrl: siteConfig.integrations.sociableKitEventsWidgetUrl,
+    facebookUrl: siteConfig.integrations.eventsFacebookPageUrl,
+    descriptionText: 'volunteer opportunities',
+    emptyStateHeading: 'No upcoming events right now',
+    emptyStateButton: 'Follow us on Facebook',
   },
 
   /**
    * Social Media Links Configuration
    * Used in: tests/social-links.spec.ts
    */
-  socialLinks: {
-    facebook: {
-      url: 'facebook.com/freeforcharity',
-      ariaLabel: 'Facebook',
-    },
-    twitter: {
-      url: 'x.com/freeforcharity1',
-      ariaLabel: 'X (Twitter)',
-    },
-    linkedin: {
-      url: 'linkedin.com/company/freeforcharity',
-      ariaLabel: 'LinkedIn',
-    },
-    github: {
-      url: 'github.com/FreeForCharity/FFC_Single_Page_Template',
-      ariaLabel: 'GitHub',
-    },
-  },
+  // Derived from siteConfig.social: only links with an href render.
+  socialLinks: siteConfig.social
+    .filter((link) => link.href.trim() !== '')
+    .map((link) => ({
+      url: link.href
+        .trim()
+        .replace(/^https?:\/\//, '')
+        .replace(/\/$/, ''),
+      ariaLabel: link.label,
+    })),
+  allSocialLabels: siteConfig.social.map((link) => link.label),
 
   /**
    * Copyright Configuration
    * Used in: tests/copyright.spec.ts
    */
   copyright: {
-    text: 'All Rights Are Reserved by Free For Charity a US 501c3 Non Profit',
+    text: `All Rights Are Reserved by ${siteConfig.name}${
+      siteConfig.taxStatusLabel.trim() ? ` ${siteConfig.taxStatusLabel.trim()}` : ''
+    }`,
     searchText: 'All Rights Are Reserved',
     // The permanent "Supported by" attribution (FFC footer standard) — sourced
     // from siteConfig.supportedBy, which is required and always rendered.
@@ -126,7 +129,7 @@ export const testConfig = {
    * Used in: tests/logo.spec.ts
    */
   logo: {
-    headerAlt: 'Free For Charity',
+    headerAlt: siteConfig.name,
     heroAlt: 'Hero image',
     navBarAriaLabel: 'Free For Charity home',
   },

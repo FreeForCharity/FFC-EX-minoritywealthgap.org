@@ -1,5 +1,6 @@
 import { testimonials } from '@/data/testimonials'
 import { team } from '@/data/team'
+import { isPending } from '@/lib/site.config'
 import { faqs } from '@/data/faqs'
 import { results } from '@/data/results'
 
@@ -23,9 +24,11 @@ describe('data modules', () => {
   })
 
   describe('team', () => {
-    it('is a non-empty array', () => {
+    it('is an array, empty only while the team is pending', () => {
       expect(Array.isArray(team)).toBe(true)
-      expect(team.length).toBeGreaterThan(0)
+      // The roster is the charity's own; until it arrives the team is listed
+      // in siteConfig.pending and the section shows the placeholder.
+      if (team.length === 0) expect(isPending('team')).toBe(true)
     })
     it('every member has a name and role; LinkedIn, when present, is an https://linkedin.com URL', () => {
       for (const m of team) {

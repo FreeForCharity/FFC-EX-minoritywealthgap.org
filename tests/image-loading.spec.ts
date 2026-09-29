@@ -14,6 +14,11 @@ import { testConfig } from './test.config'
  */
 
 test.describe('Image Loading', () => {
+  test.skip(
+    !testConfig.supporterSite,
+    "The header logo and hero mark are FFC's; a charity's site shows neither."
+  )
+
   test('images should load correctly and be visible', async ({ page }) => {
     // Navigate to the homepage
     await page.goto('/')

@@ -8,10 +8,16 @@ import { render } from '@testing-library/react'
 jest.mock('@/data/team', () => ({ team: [], configuredTeam: [] }))
 
 import Team from '../../../src/components/home-page/TheFreeForCharityTeam'
+import { siteConfig } from '@/lib/site.config'
 
 describe('TheFreeForCharityTeam — self-hiding', () => {
   it('renders nothing when the team data is empty', () => {
+    // Empty and NOT pending (a pending team shows a placeholder instead; see
+    // team-pending.test.tsx).
+    const saved = siteConfig.pending
+    siteConfig.pending = []
     const { container } = render(<Team />)
     expect(container).toBeEmptyDOMElement()
+    siteConfig.pending = saved
   })
 })

@@ -21,21 +21,30 @@ jest.mock('@/data/team', () => ({
 import { siteConfig } from '@/lib/site.config'
 import Header from '@/components/header'
 import Footer from '@/components/footer'
+import { asCharitySite, asSupporterSite, restoreSiteConfig } from '../helpers/site-identity'
 
 describe('nav links respect section visibility', () => {
   const original = {
     showPrograms: siteConfig.sections.showPrograms,
     showEvents: siteConfig.sections.showEvents,
-    widgetUrl: siteConfig.integrations.sociableKitEventsWidgetUrl,
+    sourcesConfigured: process.env.EVENTS_SOURCES_CONFIGURED,
   }
   afterEach(() => {
+    restoreSiteConfig()
     siteConfig.sections.showPrograms = original.showPrograms
     siteConfig.sections.showEvents = original.showEvents
-    siteConfig.integrations.sociableKitEventsWidgetUrl = original.widgetUrl
+    if (original.sourcesConfigured === undefined) {
+      delete process.env.EVENTS_SOURCES_CONFIGURED
+    } else {
+      process.env.EVENTS_SOURCES_CONFIGURED = original.sourcesConfigured
+    }
   })
 
   it('Header drops Team (empty data) and Programs (flag off) links', () => {
     siteConfig.sections.showPrograms = false
+    // An empty team that is not pending self-hides (a pending one shows the
+    // placeholder, covered in team-pending.test.tsx).
+    siteConfig.pending = []
     render(<Header />)
     expect(screen.queryAllByText('Team')).toHaveLength(0)
     expect(screen.queryAllByText('Programs')).toHaveLength(0)
@@ -43,25 +52,68 @@ describe('nav links respect section visibility', () => {
     expect(screen.queryAllByText('Mission').length).toBeGreaterThan(0)
   })
 
-  it('Header keeps the Programs link when the flag is on', () => {
+  it('Header keeps the Programs and FAQ links on the supporting organization site', () => {
+    asSupporterSite()
     siteConfig.sections.showPrograms = true
     render(<Header />)
     expect(screen.queryAllByText('Programs').length).toBeGreaterThan(0)
+    expect(screen.queryAllByText('FAQ').length).toBeGreaterThan(0)
+  })
+
+  // The Programs and FAQ sections carry the supporting organization's own copy
+  // and do not render on a charity's site, flags or no flags — so neither may
+  // a link to their anchors.
+  it('Header drops Programs and FAQ on a charity site even with the flags on', () => {
+    asCharitySite()
+    siteConfig.sections.showPrograms = true
+    render(<Header />)
+    expect(screen.queryAllByText('Programs')).toHaveLength(0)
+    expect(screen.queryAllByText('FAQ')).toHaveLength(0)
+    expect(screen.queryAllByText('Mission').length).toBeGreaterThan(0)
+  })
+
+  it('Footer drops Programs and FAQ on a charity site even with the flags on', () => {
+    asCharitySite()
+    siteConfig.sections.showPrograms = true
+    render(<Footer />)
+    expect(screen.queryAllByText('Programs')).toHaveLength(0)
+    expect(screen.queryAllByText('FAQ')).toHaveLength(0)
+  })
+
+  it('Footer keeps Programs and FAQ on the supporting organization site', () => {
+    asSupporterSite()
+    siteConfig.sections.showPrograms = true
+    render(<Footer />)
+    expect(screen.queryAllByText('Programs').length).toBeGreaterThan(0)
+    expect(screen.queryAllByText('FAQ').length).toBeGreaterThan(0)
   })
 
   it('Footer drops Team, Programs, and Events links when hidden', () => {
     siteConfig.sections.showPrograms = false
+    siteConfig.pending = []
     siteConfig.sections.showEvents = false
+    // Even with a configured source the flag alone must drop the link.
+    process.env.EVENTS_SOURCES_CONFIGURED = 'true'
     render(<Footer />)
     expect(screen.queryAllByText('Team')).toHaveLength(0)
     expect(screen.queryAllByText('Programs')).toHaveLength(0)
     expect(screen.queryAllByText('Events')).toHaveLength(0)
   })
 
-  it('Footer drops Events when the widget URL is empty even if the flag is on', () => {
+  it('Footer drops Events when no sources are configured even if the flag is on', () => {
+    // The template default: flag on, no EVENTS_* sources wired up, and the
+    // committed snapshot empty — the section self-hides, so the quick-link
+    // must go with it (dead-anchor guard).
     siteConfig.sections.showEvents = true
-    siteConfig.integrations.sociableKitEventsWidgetUrl = ''
+    delete process.env.EVENTS_SOURCES_CONFIGURED
     render(<Footer />)
     expect(screen.queryAllByText('Events')).toHaveLength(0)
+  })
+
+  it('Footer keeps Events when the flag is on and a source is configured', () => {
+    siteConfig.sections.showEvents = true
+    process.env.EVENTS_SOURCES_CONFIGURED = 'true'
+    render(<Footer />)
+    expect(screen.queryAllByText('Events').length).toBeGreaterThan(0)
   })
 })

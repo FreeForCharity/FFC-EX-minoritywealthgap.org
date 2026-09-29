@@ -17,6 +17,11 @@ import { testConfig } from './test.config'
  */
 
 test.describe('Application Form Button', () => {
+  test.skip(
+    !testConfig.supporterSite,
+    "The application form is part of FFC's own Programs section."
+  )
+
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
     // Wait for page to be loaded
@@ -246,6 +251,11 @@ test.describe('Application Form Button', () => {
 })
 
 test.describe('Application Form Iframe Loading', () => {
+  test.skip(
+    !testConfig.supporterSite,
+    "The application form is part of FFC's own Programs section."
+  )
+
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
     await page.waitForLoadState('domcontentloaded')

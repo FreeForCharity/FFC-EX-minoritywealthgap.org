@@ -12,7 +12,7 @@
 # `.well-known/` (Cloudflare Pages, Netlify, plain nginx, etc.) serve both.
 # The drift checker enforces that /security.txt stays in sync with this file.
 
-Contact: mailto:security@freeforcharity.org
+Contact: mailto:admin@minoritywealthgap.org
 Expires: 2027-01-01T00:00:00.000Z
 Preferred-Languages: en
 Canonical: https://ffcworkingsite1.org/.well-known/security.txt

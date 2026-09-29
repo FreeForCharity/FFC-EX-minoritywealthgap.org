@@ -8,12 +8,16 @@ import { siteConfig, siteUrl, twitterSite, cardDescription } from '@/lib/site.co
 import { assetPath } from '@/lib/assetPath'
 import { openSans, lato, faustina } from '@/lib/fonts'
 import { AT_POLYFILL_JS } from '@/lib/at-polyfill'
+import { CONSENT_MODE_BOOTSTRAP } from '@/lib/consent-mode'
 import { OG_IMAGE } from '@/lib/page-metadata'
 
 const defaultTitle = `${siteConfig.name} | ${siteConfig.tagline}`
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteConfig.url),
+  // siteUrl('/') = origin + NEXT_PUBLIC_BASE_PATH + '/', so canonicals and
+  // OG URLs resolve under the GitHub Pages subpath on default-URL deploys
+  // (and to the bare origin when a custom domain sets no basePath).
+  metadataBase: new URL(siteUrl('/')),
   title: {
     default: defaultTitle,
     template: `%s | ${siteConfig.name}`,
@@ -82,7 +86,7 @@ export default function RootLayout({
             third-party origins must be added to BOTH. */}
         <meta
           httpEquiv="Content-Security-Policy"
-          content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://www.clarity.ms https://*.clarity.ms https://widgets.guidestar.org https://connect.facebook.net https://www.zeffy.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://stats.g.doubleclick.net https://www.googletagmanager.com https://www.clarity.ms https://*.clarity.ms; frame-src https://www.googletagmanager.com https://www.zeffy.com https://widgets.guidestar.org https://www.facebook.com https://forms.office.com https://forms.microsoft.com https://www.youtube.com https://www.youtube-nocookie.com https://widgets.sociablekit.com; media-src 'self' blob: https:; object-src 'none'; base-uri 'self'; form-action 'self' https://www.zeffy.com https://forms.office.com; upgrade-insecure-requests"
+          content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://www.clarity.ms https://*.clarity.ms https://widgets.guidestar.org https://connect.facebook.net https://www.zeffy.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://stats.g.doubleclick.net https://www.googletagmanager.com https://www.clarity.ms https://*.clarity.ms; frame-src https://www.googletagmanager.com https://www.zeffy.com https://widgets.guidestar.org https://www.facebook.com https://forms.office.com https://forms.microsoft.com https://www.youtube.com https://www.youtube-nocookie.com; media-src 'self' blob: https:; object-src 'none'; base-uri 'self'; form-action 'self' https://www.zeffy.com https://forms.office.com; upgrade-insecure-requests"
         />
         <meta name="referrer" content="strict-origin-when-cross-origin" />
         <meta name="color-scheme" content="light" />
@@ -92,10 +96,8 @@ export default function RootLayout({
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="preconnect" href="https://www.zeffy.com" />
         <link rel="preconnect" href="https://widgets.guidestar.org" />
-        <link rel="preconnect" href="https://widgets.sociablekit.com" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.zeffy.com" />
-        <link rel="dns-prefetch" href="https://widgets.sociablekit.com" />
         <link rel="dns-prefetch" href="https://www.idealist.org" />
         {/* Analytics endpoints load conditionally through GTM — dns-prefetch
             only (cheaper than preconnect for resources that may not load). */}
@@ -111,6 +113,15 @@ export default function RootLayout({
           fetchPriority="high"
         />
 
+        {/* Google Consent Mode v2 defaults. MUST execute before any Google
+            tag loads, which is why it is an inline <head> script placed
+            above the GoogleTagManager component rather than a next/script:
+            the consent state has to already be in the dataLayer when GTM/GA4
+            initialise. Granted worldwide, denied (cookieless pings) only
+            where Google's EU User Consent Policy requires opt-in — Google
+            picks the default from the visitor's IP address. See
+            src/lib/consent-mode.ts. */}
+        <script dangerouslySetInnerHTML={{ __html: CONSENT_MODE_BOOTSTRAP }} />
         <GoogleTagManager />
       </head>
       <body

@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema'
 import { pageMetadata } from '@/lib/page-metadata'
+import { legalContact, publishedPhone, siteConfig } from '@/lib/site.config'
+import ContactEmail from '@/components/policy/ContactEmail'
 
 const PAGE_NAME = 'Cookie Policy'
 const CANONICAL_PATH = '/cookie-policy'
@@ -10,14 +12,16 @@ const CANONICAL_PATH = '/cookie-policy'
 // per-page OG/Twitter handling is documented in src/lib/page-metadata.ts.
 export const metadata: Metadata = pageMetadata({
   title: PAGE_NAME,
-  description: 'Cookie Policy for Free For Charity website',
+  description: `Cookie Policy for the ${siteConfig.name} website`,
   canonical: CANONICAL_PATH,
 })
 
 // Update this date when the policy changes
-const LAST_UPDATED = 'December 7, 2025'
+const LAST_UPDATED = 'August 30, 2026'
 
 export default function CookiePolicy() {
+  const legal = legalContact('cookie')
+  const phone = publishedPhone()
   return (
     <div className="pt-[140px] pb-[54px]">
       <BreadcrumbSchema name={PAGE_NAME} path={CANONICAL_PATH} />
@@ -54,10 +58,12 @@ export default function CookiePolicy() {
               Remember your cookie consent preferences
             </li>
             <li className="text-[14px] text-[#666] leading-[24px] font-[500]">
-              Understand how you use our website (with your consent)
+              Understand how you use our website (subject to your region&apos;s default and your
+              cookie choices — see &quot;When we ask permission first&quot; in Section 3.3)
             </li>
             <li className="text-[14px] text-[#666] leading-[24px] font-[500]">
-              Analyze website traffic and user behavior (with your consent)
+              Analyze website traffic and user behavior (subject to the same regional model and your
+              choices)
             </li>
             <li className="text-[14px] text-[#666] leading-[24px] font-[500]">
               Improve our website and user experience
@@ -203,13 +209,37 @@ export default function CookiePolicy() {
 
           {/* 3.3 Analytics Cookies */}
           <p className="text-[14px] text-[#666] pb-[10px] leading-[24px] font-[500] mt-[1em]">
-            <strong>3.3 Analytics Cookies (Requires Consent)</strong>
+            <strong>3.3 Analytics Cookies</strong>
           </p>
           <p className="text-[14px] text-[#666] pb-[10px] leading-[24px] font-[500]">
             These cookies help us understand how visitors interact with our website by collecting
             and reporting information anonymously. We use this information to improve our website
             and user experience.
           </p>
+          <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
+            <p className="text-sm text-[#333] mb-2">
+              <strong>When we ask permission first</strong>
+            </p>
+            <p className="text-sm text-[#666] mb-2">
+              We use Google Consent Mode. Which default applies to you is determined by Google from
+              your IP address at the time of your visit (IP geolocation is approximate). If you are
+              in the European Economic Area, the United Kingdom, or Switzerland, Google&apos;s tags
+              set <strong>no cookies and collect no identifiers</strong> until you accept. They
+              still count your visit in an aggregate, cookie-free way so we know how many people
+              used the site — that measurement cannot be tied back to you or to your next visit.
+            </p>
+            <p className="text-sm text-[#666] mb-2">
+              Everywhere else, including the United States, Google Analytics cookies are set from
+              your first pageview. You can turn them off at any time using the Cookie Preferences
+              link in our footer, and we will delete the cookies listed below when you do.
+            </p>
+            <p className="text-sm text-[#666]">
+              <strong>Microsoft Clarity is different.</strong> It records how visitors move through
+              pages, so it runs <strong>only if you explicitly accept</strong> analytics cookies —
+              everywhere in the world, not just in Europe. Declining, or simply not answering the
+              banner, keeps it off.
+            </p>
+          </div>
 
           {/* Google Analytics */}
           <div className="bg-gray-50 p-4 rounded-lg mb-4">
@@ -445,13 +475,17 @@ export default function CookiePolicy() {
 
           {/* Section 5 */}
           <h2 className="text-[26px] leading-[26px] font-[700] text-[#333] mb-[10px]">
-            <strong>5. Do Not Track Signals</strong>
+            <strong>5. Do Not Track and Global Privacy Control</strong>
           </h2>
           <p className="text-[14px] text-[#666] pb-[10px] leading-[24px] font-[500]">
-            Some browsers have a &quot;Do Not Track&quot; feature that lets you tell websites that
-            you do not want to have your online activities tracked. At this time, we do not respond
-            to browser &quot;Do Not Track&quot; signals. However, you can control cookies through
-            our cookie consent banner.
+            This site does not read or respond to Do Not Track or Global Privacy Control browser
+            signals programmatically. We do not sell or share personal information as defined by the
+            CCPA/CPRA, so there is nothing for those signals to opt out of on this site. Note that
+            analytics cookies <strong>are</strong> set automatically outside the European Economic
+            Area, the United Kingdom, and Switzerland (see &quot;When we ask permission first&quot;
+            in Section 3.3); any visitor, anywhere, can turn them off at any time via the Cookie
+            Preferences link in the footer, and we delete the cookies we set when you do. Microsoft
+            Clarity and the Meta Pixel stay off everywhere unless you explicitly opt in.
           </p>
 
           {/* Section 6 */}
@@ -473,20 +507,26 @@ export default function CookiePolicy() {
           </p>
           <ul className="list-inside list-disc space-y-[4px] pb-[1em]">
             <li className="text-[14px] text-[#666] leading-[24px] font-[500]">
+              <strong>Organization:</strong> {siteConfig.name}
+            </li>
+            <li className="text-[14px] text-[#666] leading-[24px] font-[500]">
               <strong>Email:</strong>{' '}
-              <a href="mailto:privacy@freeforcharity.org" className="text-blue-600 underline">
-                privacy@freeforcharity.org
-              </a>
+              <ContactEmail email={legal.email} className="text-blue-600 underline" />
             </li>
-            <li className="text-[14px] text-[#666] leading-[24px] font-[500]">
-              <strong>Emergency Contact:</strong> Clarke Moyer
-            </li>
-            <li className="text-[14px] text-[#666] leading-[24px] font-[500]">
-              <strong>Phone:</strong>{' '}
-              <a href="tel:520-222-8104" className="text-blue-600 underline">
-                520-222-8104
-              </a>
-            </li>
+            {legal.name && (
+              <li className="text-[14px] text-[#666] leading-[24px] font-[500]">
+                <strong>Emergency Contact:</strong> {legal.name}
+              </li>
+            )}
+            {/* Only a configured number is shown, matching the footer's phone guard. */}
+            {phone && (
+              <li className="text-[14px] text-[#666] leading-[24px] font-[500]">
+                <strong>Phone:</strong>{' '}
+                <a href={`tel:${phone.tel}`} className="text-blue-600 underline">
+                  {phone.display}
+                </a>
+              </li>
+            )}
           </ul>
 
           {/* Section 8 */}

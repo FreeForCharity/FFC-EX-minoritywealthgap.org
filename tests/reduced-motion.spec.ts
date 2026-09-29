@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { testConfig } from './test.config'
 
 /**
  * WCAG 2.3.3 guardrail: when the user has prefers-reduced-motion: reduce,
@@ -15,6 +16,11 @@ import { test, expect } from '@playwright/test'
  */
 
 test.describe('prefers-reduced-motion', () => {
+  test.skip(
+    !testConfig.supporterSite,
+    "The Results numbers are FFC's own; they render only on FFC's site."
+  )
+
   test('Results-2023 stat numbers settle without a multi-frame animation', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await page.goto('/')

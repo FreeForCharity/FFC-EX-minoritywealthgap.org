@@ -16,8 +16,20 @@ jest.mock('swiper/css/navigation', () => ({}), { virtual: true })
 
 import Testimonials from '@/components/home-page/Testimonials'
 import { testimonials } from '@/data/testimonials'
+import { asCharitySite, asSupporterSite, restoreSiteConfig } from '../helpers/site-identity'
 
 describe('Testimonials component', () => {
+  // The shipped quotes praise the supporting organization, so the slider
+  // renders only on its own site (see testimonialsSectionVisible).
+  beforeEach(asSupporterSite)
+  afterEach(restoreSiteConfig)
+
+  it("renders nothing on a charity's site", () => {
+    asCharitySite()
+    const { container } = render(<Testimonials />)
+    expect(container).toBeEmptyDOMElement()
+  })
+
   it('renders the section heading', () => {
     render(<Testimonials />)
     expect(screen.getByRole('heading', { name: 'Testimonials' })).toBeInTheDocument()
